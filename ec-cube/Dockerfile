@@ -67,9 +67,6 @@ RUN curl -sS https://getcomposer.org/installer \
 
 RUN composer config -g repos.packagist composer https://packagist.jp
 
-# composer updateを実行
-RUN composer update
-
 COPY . ${APACHE_DOCUMENT_ROOT}
 WORKDIR ${APACHE_DOCUMENT_ROOT}
 
