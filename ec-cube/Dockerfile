@@ -61,6 +61,9 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY ec-cube/dockerbuild/php.ini $PHP_INI_DIR/conf.d/
 COPY ec-cube/dockerbuild/docker-php-entrypoint /usr/local/bin/
 
+COPY ec-cube/composer.json /var/www/html/
+COPY ec-cube/composer.lock /var/www/html/
+
 RUN curl -sS https://getcomposer.org/installer \
   | php \
   && mv composer.phar /usr/bin/composer
