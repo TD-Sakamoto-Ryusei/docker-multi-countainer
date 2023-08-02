@@ -58,7 +58,7 @@ EXPOSE 443
 # Use the default production configuration
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 # Override with custom configuration settings
-COPY dockerbuild/php.ini $PHP_INI_DIR/conf.d/
+COPY ec-cube/dockerbuild/php.ini $PHP_INI_DIR/conf.d/
 COPY ec-cube/dockerbuild/docker-php-entrypoint /usr/local/bin/
 
 RUN curl -sS https://getcomposer.org/installer \
