@@ -62,7 +62,7 @@ COPY ec-cube/dockerbuild/php.ini $PHP_INI_DIR/conf.d/
 COPY ec-cube/dockerbuild/docker-php-entrypoint /usr/local/bin/
 
 COPY ec-cube/composer.json /var/www/html/
-
+COPY ec-cube/composer.lock /var/www/html/
 
 RUN curl -sS https://getcomposer.org/installer \
   | php \
