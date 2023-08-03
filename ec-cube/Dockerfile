@@ -69,7 +69,8 @@ RUN curl -sS https://getcomposer.org/installer | php && \
     php /usr/bin/composer dump-autoload
 
 # Composerの設定
-RUN composer config -g repos.packagist composer https://packagist.jp
+RUN composer config -g repos.packagist composer https://packagist.jp && \
+    composer update
 
 #symfony installer
 RUN curl -sS https://get.symfony.com/cli/installer | bash
