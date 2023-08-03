@@ -1,6 +1,6 @@
 FROM php:7.4-apache-bullseye
 
-ENV APACHE_DOCUMENT_ROOT /var/www/ec-cube
+ENV APACHE_DOCUMENT_ROOT /var/www/html
 
 RUN apt update \
   && apt upgrade -y \
@@ -81,5 +81,7 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
   && find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune \) -or \( -type d -print0 \) \
   | xargs -0 chmod g+s \
   ;
+
+RUN ls
 
 HEALTHCHECK --interval=10s --timeout=5s --retries=30 CMD pgrep apache
