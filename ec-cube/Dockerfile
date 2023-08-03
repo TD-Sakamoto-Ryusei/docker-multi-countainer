@@ -39,7 +39,7 @@ RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
 
 RUN pecl install apcu && echo "extension=apcu.so" > /usr/local/etc/php/conf.d/apc.ini
 
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - \
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
   && apt update \
   && apt install -y nodejs \
   && apt clean \
@@ -66,14 +66,16 @@ COPY ec-cube/composer.lock /var/www/html/
 
 RUN curl -sS https://getcomposer.org/installer | php && \
     mv composer.phar /usr/bin/composer && \
-    php /usr/bin/composer dump-autoload && \
-    php /bin/console install
+    php /usr/bin/composer dump-autoload
 
 # Composerの設定
 RUN composer config -g repos.packagist composer https://packagist.jp
 
 COPY . ${APACHE_DOCUMENT_ROOT}
 WORKDIR ${APACHE_DOCUMENT_ROOT}
+
+RUN php bin/console cache:clear --no-warmup && \
+    php bin/console install
 
 RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune \) -or -print0 \
   | xargs -0 chown www-data:www-data \
