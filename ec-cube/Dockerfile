@@ -63,8 +63,8 @@ COPY ec-cube/dockerbuild/docker-php-entrypoint /usr/local/bin/
 
 RUN curl -sS https://getcomposer.org/installer | php && \
     mv composer.phar /usr/bin/composer && \
-    php composer.phar selfupdate --1 && \
-    php composer.phar create-project ec-cube/ec-cube ec-cube "4.1.x-dev" --keep-vcs
+    php /usr/bin/composer selfupdate --1 && \
+    php /usr/bin/composer create-project ec-cube/ec-cube ec-cube "4.1.x-dev" --keep-vcs
 
 
 # Composerの設定
