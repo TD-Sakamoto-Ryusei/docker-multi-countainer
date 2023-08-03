@@ -66,7 +66,7 @@ COPY ec-cube/composer.lock /var/www/html/
 
 RUN curl -sS https://getcomposer.org/installer | php \
   && mv composer.phar /usr/bin/composer \
-  && bin/console eccube:composer:require ec-cube/api42 \
+  && php /usr/bin/composer require ec-cube/api42 \
   && php /usr/bin/composer install
 
 # Composerの設定
