@@ -66,8 +66,14 @@ COPY ec-cube/composer.lock /var/www/html/
 
 RUN curl -sS https://getcomposer.org/installer | php \
   && mv composer.phar /usr/bin/composer \
-  && php /usr/bin/composer install \
-  && composer config -g repos.packagist composer https://packagist.jp
+  && php /usr/bin/composer install
+
+# EC-CUBEプラグインのインストール
+RUN bin/console eccube:composer:require ec-cube/api42
+
+# Composerの設定
+RUN composer config -g repos.packagist composer https://packagist.jp
+
 
 COPY . ${APACHE_DOCUMENT_ROOT}
 WORKDIR ${APACHE_DOCUMENT_ROOT}
