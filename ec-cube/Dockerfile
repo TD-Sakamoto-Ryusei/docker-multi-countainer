@@ -69,10 +69,11 @@ RUN curl -sS https://getcomposer.org/installer \
   && mv composer.phar /usr/bin/composer
 
 RUN composer config -g repos.packagist composer https://packagist.jp
-RUN composer update
 
 COPY . ${APACHE_DOCUMENT_ROOT}
 WORKDIR ${APACHE_DOCUMENT_ROOT}
+
+RUN php composer.phar update
 
 RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune \) -or -print0 \
   | xargs -0 chown www-data:www-data \
