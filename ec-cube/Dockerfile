@@ -69,6 +69,7 @@ RUN curl -sS https://getcomposer.org/installer \
   && mv composer.phar /usr/bin/composer
 
 RUN composer config -g repos.packagist composer https://packagist.jp
+RUN composer update
 
 COPY . ${APACHE_DOCUMENT_ROOT}
 WORKDIR ${APACHE_DOCUMENT_ROOT}
