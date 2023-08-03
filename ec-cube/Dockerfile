@@ -66,9 +66,6 @@ COPY ec-cube/composer.lock /var/www/html/
 
 RUN curl -sS https://getcomposer.org/installer | php && \
     mv composer.phar /usr/bin/composer && \
-    php /usr/bin/composer require ec-cube/api42 && \
-    php /usr/bin/composer require symfony/string && \
-    php /usr/bin/composer remove symfony/inflector && \
     php /usr/bin/composer dump-autoload && \
     php /path/to/bin/console install
 
