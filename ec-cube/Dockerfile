@@ -74,9 +74,6 @@ RUN composer config -g repos.packagist composer https://packagist.jp
 COPY . ${APACHE_DOCUMENT_ROOT}
 WORKDIR ${APACHE_DOCUMENT_ROOT}
 
-RUN bin/console cache:clear --no-warmup && \
-    bin/console eccube:composer:install
-
 RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune \) -or -print0 \
   | xargs -0 chown www-data:www-data \
   && find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune \) -or \( -type d -print0 \) \
