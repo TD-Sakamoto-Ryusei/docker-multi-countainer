@@ -1,6 +1,6 @@
 FROM php:7.4-apache-bullseye
 
-ENV APACHE_DOCUMENT_ROOT /var/www/html
+ENV APACHE_DOCUMENT_ROOT /var/www/ec-cube
 
 RUN apt update \
   && apt upgrade -y \
@@ -63,7 +63,9 @@ COPY ec-cube/dockerbuild/docker-php-entrypoint /usr/local/bin/
 
 RUN curl -sS https://getcomposer.org/installer | php && \
     mv composer.phar /usr/bin/composer && \
-    php /usr/bin/composer dump-autoload
+    php composer.phar selfupdate --1 && \
+    php composer.phar create-project ec-cube/ec-cube ec-cube "4.1.x-dev" --keep-vcs
+
 
 # Composerの設定
 RUN composer config -g repos.packagist composer https://packagist.jp
