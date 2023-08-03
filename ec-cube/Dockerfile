@@ -64,16 +64,13 @@ COPY ec-cube/dockerbuild/docker-php-entrypoint /usr/local/bin/
 COPY ec-cube/composer.json /var/www/html/
 COPY ec-cube/composer.lock /var/www/html/
 
-RUN curl -sS https://getcomposer.org/installer \
-  | php \
-  && mv composer.phar /usr/bin/composer
-
-RUN composer config -g repos.packagist composer https://packagist.jp
-
+RUN curl -sS https://getcomposer.org/installer | php \
+  && mv composer.phar /usr/bin/composer \
+  && php composer.phar install \
+  && composer config -g repos.packagist composer https://packagist.jp
+  
 COPY . ${APACHE_DOCUMENT_ROOT}
 WORKDIR ${APACHE_DOCUMENT_ROOT}
-
-RUN rm -r vendor/ && rm composer.lock && composer install --no-cache
 
 RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune \) -or -print0 \
   | xargs -0 chown www-data:www-data \
