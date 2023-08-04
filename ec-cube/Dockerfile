@@ -67,7 +67,7 @@ COPY ec-cube/dockerbuild/docker-php-entrypoint /usr/local/bin/
 #     php /usr/bin/composer create-project ec-cube/ec-cube ec-cube "4.2.x-dev" --keep-vcs
 
 # Composerの設定
-RUN composer config -g repos.packagist composer https://packagist.jp
+# RUN composer config -g repos.packagist composer https://packagist.jp
 
 #symfony
 # RUN curl -sS https://get.symfony.com/cli/installer | bash
