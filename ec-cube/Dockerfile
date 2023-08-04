@@ -83,14 +83,14 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
 
 RUN cat .env
 
+RUN composer clear-cache && \
+    composer update && \
+    composer install --no-scripts --no-autoloader --no-plugins -d ${APACHE_DOCUMENT_ROOT}
+
 RUN bin/console cache:clear && \
     bin/console doctrine:database:create && \
     bin/console doctrine:schema:create && \
     bin/console eccube:fixtures:load && \
     bin/console eccube:composer:install
-
-RUN composer clear-cache && \
-    composer update && \
-    composer install --no-scripts --no-autoloader --no-plugins -d ${APACHE_DOCUMENT_ROOT}
 
 HEALTHCHECK --interval=10s --timeout=5s --retries=30 CMD pgrep apache
