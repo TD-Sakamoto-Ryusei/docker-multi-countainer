@@ -1,6 +1,6 @@
 FROM php:7.4-apache-bullseye
 
-ENV APACHE_DOCUMENT_ROOT ./ec-cube/ec-cube
+ENV APACHE_DOCUMENT_ROOT ./ec-cube
 
 RUN apt update \
   && apt upgrade -y \
@@ -61,16 +61,16 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY ec-cube/dockerbuild/php.ini $PHP_INI_DIR/conf.d/
 COPY ec-cube/dockerbuild/docker-php-entrypoint /usr/local/bin/
 
-RUN curl -sS https://getcomposer.org/installer | php && \
-    mv composer.phar /usr/bin/composer && \
-    php /usr/bin/composer selfupdate --2 && \
-    php /usr/bin/composer create-project ec-cube/ec-cube ec-cube "4.2.x-dev" --keep-vcs
+# RUN curl -sS https://getcomposer.org/installer | php && \
+#     mv composer.phar /usr/bin/composer && \
+#     php /usr/bin/composer selfupdate --2 && \
+#     php /usr/bin/composer create-project ec-cube/ec-cube ec-cube "4.2.x-dev" --keep-vcs
 
 # Composerの設定
 RUN composer config -g repos.packagist composer https://packagist.jp
 
 #symfony
-RUN curl -sS https://get.symfony.com/cli/installer | bash
+# RUN curl -sS https://get.symfony.com/cli/installer | bash
 
 COPY . ${APACHE_DOCUMENT_ROOT}
 WORKDIR ${APACHE_DOCUMENT_ROOT}
@@ -81,13 +81,13 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
   | xargs -0 chmod g+s \
   ;
 
+RUN composer install --no-scripts --no-autoloader --no-plugins -d ${APACHE_DOCUMENT_ROOT} && \
+    composer update 
+
 RUN bin/console cache:clear && \
     bin/console doctrine:database:create && \
     bin/console doctrine:schema:create && \
     bin/console eccube:fixtures:load && \
     bin/console eccube:composer:install
-
-RUN composer install --no-scripts --no-autoloader --no-plugins -d ${APACHE_DOCUMENT_ROOT} && \
-    composer update 
 
 HEALTHCHECK --interval=10s --timeout=5s --retries=30 CMD pgrep apache
