@@ -148,7 +148,6 @@ class PluginManager
      * @param bool             $failOnMissingClasses By default this silently skips plugins that can not be found, but if set to true it fails with an exception
      * @param bool             $isGlobalPlugin       Set to true to denote plugins which are installed in the global Composer directory
      *
-     *
      * @throws \UnexpectedValueException
      */
     public function registerPackage(PackageInterface $package, bool $failOnMissingClasses = false, bool $isGlobalPlugin = false): void
@@ -188,7 +187,7 @@ class PluginManager
             }
         }
 
-        if (!$this->isPluginAllowed($package->getName(), $isGlobalPlugin)) {
+        if (!$this->isPluginAllowed($package->getName(), $isGlobalPlugin, true === ($package->getExtra()['plugin-optional'] ?? false))) {
             $this->io->writeError('Skipped loading "'.$package->getName() . '" '.($isGlobalPlugin || $this->runningInGlobalDir ? '(installed globally) ' : '').'as it is not in config.allow-plugins', true, IOInterface::DEBUG);
 
             return;
@@ -237,8 +236,11 @@ class PluginManager
                 continue;
             }
 
-            $downloadPath = $this->getInstallPath($autoloadPackage, $globalRepo && $globalRepo->hasPackage($autoloadPackage));
-            $autoloads[] = [$autoloadPackage, $downloadPath];
+            $installPath = $this->getInstallPath($autoloadPackage, $globalRepo && $globalRepo->hasPackage($autoloadPackage));
+            if ($installPath === null) {
+                continue;
+            }
+            $autoloads[] = [$autoloadPackage, $installPath];
         }
 
         $map = $generator->parseAutoloads($autoloads, $rootPackage);
@@ -265,7 +267,7 @@ class PluginManager
                 if ($separatorPos) {
                     $className = substr($class, $separatorPos + 1);
                 }
-                $code = Preg::replace('{^((?:final\s+)?(?:\s*))class\s+('.preg_quote($className).')}mi', '$1class $2_composer_tmp'.self::$classCounter, $code, 1);
+                $code = Preg::replace('{^((?:(?:final|readonly)\s+)*(?:\s*))class\s+('.preg_quote($className).')}mi', '$1class $2_composer_tmp'.self::$classCounter, $code, 1);
                 $code = strtr($code, [
                     '__FILE__' => var_export($path, true),
                     '__DIR__' => var_export(dirname($path), true),
@@ -304,8 +306,6 @@ class PluginManager
      * If it's of type composer-installer it is unregistered from the installers
      * instead for BC
      *
-     *
-     *
      * @throws \UnexpectedValueException
      */
     public function deactivatePackage(PackageInterface $package): void
@@ -328,8 +328,6 @@ class PluginManager
      *
      * If it's of type composer-installer it is unregistered from the installers
      * instead for BC
-     *
-     *
      *
      * @throws \UnexpectedValueException
      */
@@ -375,7 +373,7 @@ class PluginManager
 
         if ($sourcePackage === null) {
             trigger_error('Calling PluginManager::addPlugin without $sourcePackage is deprecated, if you are using this please get in touch with us to explain the use case', E_USER_DEPRECATED);
-        } elseif (!$this->isPluginAllowed($sourcePackage->getName(), $isGlobalPlugin)) {
+        } elseif (!$this->isPluginAllowed($sourcePackage->getName(), $isGlobalPlugin, true === ($sourcePackage->getExtra()['plugin-optional'] ?? false))) {
             $this->io->writeError('Skipped loading "'.get_class($plugin).' from '.$sourcePackage->getName() . '" '.($isGlobalPlugin || $this->runningInGlobalDir ? '(installed globally) ' : '').' as it is not in config.allow-plugins', true, IOInterface::DEBUG);
 
             return;
@@ -445,7 +443,6 @@ class PluginManager
      * call this method as early as possible.
      *
      * @param RepositoryInterface $repo Repository to scan for plugins to install
-     *
      *
      * @throws \RuntimeException
      */
@@ -530,9 +527,9 @@ class PluginManager
      *
      * @param bool             $global  Whether this is a global package
      *
-     * @return string Install path
+     * @return string|null Install path
      */
-    private function getInstallPath(PackageInterface $package, bool $global = false): string
+    private function getInstallPath(PackageInterface $package, bool $global = false): ?string
     {
         if (!$global) {
             return $this->composer->getInstallationManager()->getInstallPath($package);
@@ -662,7 +659,7 @@ class PluginManager
     /**
      * @internal
      */
-    public function isPluginAllowed(string $package, bool $isGlobalPlugin): bool
+    public function isPluginAllowed(string $package, bool $isGlobalPlugin, bool $optional = false): bool
     {
         if ($isGlobalPlugin) {
             $rules = &$this->allowGlobalPluginRules;
@@ -739,6 +736,8 @@ class PluginManager
                         break;
                 }
             }
+        } elseif ($optional) {
+            return false;
         }
 
         throw new PluginBlockedException(

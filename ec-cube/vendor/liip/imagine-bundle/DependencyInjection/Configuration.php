@@ -109,7 +109,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('driver')->defaultValue('gd')
                     ->validate()
                         ->ifTrue(function ($v) {
-                            return !\in_array($v, ['gd', 'imagick', 'gmagick'], true);
+                            return !\in_array($v, ['gd', 'imagick', 'gmagick', 'vips'], true);
                         })
                         ->thenInvalid('Invalid imagine driver specified: %s')
                     ->end()
@@ -134,6 +134,7 @@ class Configuration implements ConfigurationInterface
                             ->useAttributeAsKey('name')
                             ->prototype('array')
                                 ->useAttributeAsKey('name')
+                                ->ignoreExtraKeys(false)
                                 ->prototype('variable')->end()
                             ->end()
                         ->end()
@@ -142,6 +143,7 @@ class Configuration implements ConfigurationInterface
                             ->useAttributeAsKey('name')
                             ->prototype('array')
                                 ->useAttributeAsKey('name')
+                                ->ignoreExtraKeys(false)
                                 ->prototype('variable')->end()
                             ->end()
                         ->end()
@@ -180,6 +182,7 @@ class Configuration implements ConfigurationInterface
                                 ->useAttributeAsKey('name')
                                 ->prototype('array')
                                     ->useAttributeAsKey('name')
+                                    ->ignoreExtraKeys(false)
                                     ->prototype('variable')->end()
                                 ->end()
                             ->end()
@@ -188,6 +191,7 @@ class Configuration implements ConfigurationInterface
                                 ->useAttributeAsKey('name')
                                 ->prototype('array')
                                     ->useAttributeAsKey('name')
+                                    ->ignoreExtraKeys(false)
                                     ->prototype('variable')->end()
                                 ->end()
                         ->end()
@@ -251,6 +255,7 @@ class Configuration implements ConfigurationInterface
                             ->useAttributeAsKey('name')
                             ->prototype('array')
                                 ->useAttributeAsKey('name')
+                                ->ignoreExtraKeys(false)
                                 ->prototype('variable')->end()
                             ->end()
                     ->end()

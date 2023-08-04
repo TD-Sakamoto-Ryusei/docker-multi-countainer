@@ -177,9 +177,7 @@ abstract class AbstractEntityPersister implements CachedEntityPersister
         return $this->region;
     }
 
-    /**
-     * @return EntityHydrator
-     */
+    /** @return EntityHydrator */
     public function getEntityHydrator()
     {
         return $this->hydrator;
@@ -207,9 +205,7 @@ abstract class AbstractEntityPersister implements CachedEntityPersister
         return $cached;
     }
 
-    /**
-     * @param object $entity
-     */
+    /** @param object $entity */
     private function storeJoinedAssociations($entity): void
     {
         if ($this->joinedAssociations === null) {
@@ -250,7 +246,7 @@ abstract class AbstractEntityPersister implements CachedEntityPersister
      *
      * @param string            $query
      * @param string[]|Criteria $criteria
-     * @param string[]          $orderBy
+     * @param string[]|null     $orderBy
      * @param int|null          $limit
      * @param int|null          $offset
      *

@@ -55,6 +55,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  * @author Jordi Boggiano <j.boggiano@seld.be>
  * @author Jérémy Romey <jeremyFreeAgent>
  * @author Mihai Plasoianu <mihai@plasoianu.de>
+ *
+ * @phpstan-import-type AutoloadRules from PackageInterface
+ * @phpstan-type JsonStructure array<string, null|string|array<string|null>|AutoloadRules>
  */
 class ShowCommand extends BaseCommand
 {
@@ -107,7 +110,7 @@ class ShowCommand extends BaseCommand
 The show command displays detailed information about a package, or
 lists all packages available.
 
-Read more at https://getcomposer.org/doc/03-cli.md#show
+Read more at https://getcomposer.org/doc/03-cli.md#show-info
 EOT
             )
         ;
@@ -329,7 +332,12 @@ EOT
             }
             if ($input->getOption('path')) {
                 $io->write($package->getName(), false);
-                $io->write(' ' . strtok(realpath($composer->getInstallationManager()->getInstallPath($package)), "\r\n"));
+                $path = $composer->getInstallationManager()->getInstallPath($package);
+                if (is_string($path)) {
+                    $io->write(' ' . strtok(realpath($path), "\r\n"));
+                } else {
+                    $io->write(' null');
+                }
 
                 return $exitCode;
             }
@@ -506,7 +514,12 @@ EOT
                             $packageViewData['description'] = $package->getDescription();
                         }
                         if ($writePath) {
-                            $packageViewData['path'] = strtok(realpath($composer->getInstallationManager()->getInstallPath($package)), "\r\n");
+                            $path = $composer->getInstallationManager()->getInstallPath($package);
+                            if (is_string($path)) {
+                                $packageViewData['path'] = strtok(realpath($path), "\r\n");
+                            } else {
+                                $packageViewData['path'] = null;
+                            }
                         }
 
                         $packageIsAbandoned = false;
@@ -600,22 +613,26 @@ EOT
                         }
                     }
 
-                    $io->write('');
-                    $io->write('<info>Direct dependencies required in composer.json:</>');
+                    $io->writeError('');
+                    $io->writeError('<info>Direct dependencies required in composer.json:</>');
                     if (\count($directDeps) > 0) {
                         $this->printPackages($io, $directDeps, $indent, $versionFits, $latestFits, $descriptionFits, $width, $versionLength, $nameLength, $latestLength);
                     } else {
-                        $io->write('Everything up to date');
+                        $io->writeError('Everything up to date');
                     }
-                    $io->write('');
-                    $io->write('<info>Transitive dependencies not required in composer.json:</>');
+                    $io->writeError('');
+                    $io->writeError('<info>Transitive dependencies not required in composer.json:</>');
                     if (\count($transitiveDeps) > 0) {
                         $this->printPackages($io, $transitiveDeps, $indent, $versionFits, $latestFits, $descriptionFits, $width, $versionLength, $nameLength, $latestLength);
                     } else {
-                        $io->write('Everything up to date');
+                        $io->writeError('Everything up to date');
                     }
                 } else {
-                    $this->printPackages($io, $packages, $indent, $versionFits, $latestFits, $descriptionFits, $width, $versionLength, $nameLength, $latestLength);
+                    if ($writeLatest && \count($packages) === 0) {
+                        $io->writeError('All your direct dependencies are up to date');
+                    } else {
+                        $this->printPackages($io, $packages, $indent, $versionFits, $latestFits, $descriptionFits, $width, $versionLength, $nameLength, $latestLength);
+                    }
                 }
 
                 if ($showAllTypes) {
@@ -628,7 +645,7 @@ EOT
     }
 
     /**
-     * @param array<array{name: string, direct-dependency?: bool, version?: string, latest?: string, latest-status?: string, description?: string|null, path?: string, source?: string|null, homepage?: string|null, warning?: string, abandoned?: bool|string}> $packages
+     * @param array<array{name: string, direct-dependency?: bool, version?: string, latest?: string, latest-status?: string, description?: string|null, path?: string|null, source?: string|null, homepage?: string|null, warning?: string, abandoned?: bool|string}> $packages
      */
     private function printPackages(IOInterface $io, array $packages, string $indent, bool $writeVersion, bool $writeLatest, bool $writeDescription, int $width, int $versionLength, int $nameLength, int $latestLength): void
     {
@@ -662,8 +679,8 @@ EOT
                 }
                 $io->write(' ' . $description, false);
             }
-            if (isset($package['path'])) {
-                $io->write(' ' . $package['path'], false);
+            if (array_key_exists('path', $package)) {
+                $io->write(' '.(is_string($package['path']) ? $package['path'] : 'null'), false);
             }
             $io->write('');
             if (isset($package['warning'])) {
@@ -677,7 +694,12 @@ EOT
      */
     protected function getRootRequires(): array
     {
-        $rootPackage = $this->requireComposer()->getPackage();
+        $composer = $this->tryComposer();
+        if ($composer === null) {
+            return [];
+        }
+
+        $rootPackage = $composer->getPackage();
 
         return array_map(
             'strtolower',
@@ -790,7 +812,12 @@ EOT
         $io->write('<info>source</info>   : ' . sprintf('[%s] <comment>%s</comment> %s', $package->getSourceType(), $package->getSourceUrl(), $package->getSourceReference()));
         $io->write('<info>dist</info>     : ' . sprintf('[%s] <comment>%s</comment> %s', $package->getDistType(), $package->getDistUrl(), $package->getDistReference()));
         if ($installedRepo->hasPackage($package)) {
-            $io->write('<info>path</info>     : ' . sprintf('%s', realpath($this->requireComposer()->getInstallationManager()->getInstallPath($package))));
+            $path = $this->requireComposer()->getInstallationManager()->getInstallPath($package);
+            if (is_string($path)) {
+                $io->write('<info>path</info>     : ' . realpath($path));
+            } else {
+                $io->write('<info>path</info>     : null');
+            }
         }
         $io->write('<info>names</info>    : ' . implode(', ', $package->getNames()));
 
@@ -811,7 +838,7 @@ EOT
             }
         }
 
-        if ($package->getAutoload()) {
+        if (\count($package->getAutoload()) > 0) {
             $io->write("\n<info>autoload</info>");
             $autoloadConfig = $package->getAutoload();
             foreach ($autoloadConfig as $type => $autoloads) {
@@ -946,9 +973,14 @@ EOT
         }
 
         if ($installedRepo->hasPackage($package)) {
-            $json['path'] = realpath($this->requireComposer()->getInstallationManager()->getInstallPath($package));
-            if ($json['path'] === false) {
-                unset($json['path']);
+            $path = $this->requireComposer()->getInstallationManager()->getInstallPath($package);
+            if (is_string($path)) {
+                $path = realpath($path);
+                if ($path !== false) {
+                    $json['path'] = $path;
+                }
+            } else {
+                $json['path'] = null;
             }
         }
 
@@ -976,9 +1008,9 @@ EOT
     }
 
     /**
-     * @param array<string, string|string[]|null> $json
+     * @param JsonStructure $json
      * @param array<string, string> $versions
-     * @return array<string, string|string[]|null>
+     * @return JsonStructure
      */
     private function appendVersions(array $json, array $versions): array
     {
@@ -990,8 +1022,8 @@ EOT
     }
 
     /**
-     * @param array<string, string|string[]|null> $json
-     * @return array<string, string|string[]|null>
+     * @param JsonStructure $json
+     * @return JsonStructure
      */
     private function appendLicenses(array $json, CompletePackageInterface $package): array
     {
@@ -1017,12 +1049,12 @@ EOT
     }
 
     /**
-     * @param array<string, string|string[]|null> $json
-     * @return array<string, string|string[]|null>
+     * @param JsonStructure $json
+     * @return JsonStructure
      */
     private function appendAutoload(array $json, CompletePackageInterface $package): array
     {
-        if ($package->getAutoload()) {
+        if (\count($package->getAutoload()) > 0) {
             $autoload = [];
 
             foreach ($package->getAutoload() as $type => $autoloads) {
@@ -1050,8 +1082,8 @@ EOT
     }
 
     /**
-     * @param array<string, string|string[]|null> $json
-     * @return array<string, string|string[]|null>
+     * @param JsonStructure $json
+     * @return JsonStructure
      */
     private function appendLinks(array $json, CompletePackageInterface $package): array
     {
@@ -1063,8 +1095,8 @@ EOT
     }
 
     /**
-     * @param array<string, string|string[]|null> $json
-     * @return array<string, string|string[]|null>
+     * @param JsonStructure $json
+     * @return JsonStructure
      */
     private function appendLink(array $json, CompletePackageInterface $package, string $linkType): array
     {
@@ -1356,8 +1388,8 @@ EOT
         }
 
         if ($targetVersion === null) {
-            if ($majorOnly && Preg::isMatch('{^(\d+)\.}', $package->getVersion(), $match)) {
-                $targetVersion = '>='.($match[1] + 1).',<9999999-dev';
+            if ($majorOnly && Preg::isMatch('{^(?P<zero_major>(?:0\.)+)?(?P<first_meaningful>\d+)\.}', $package->getVersion(), $match)) {
+                $targetVersion = '>='.$match['zero_major'].(((int) $match['first_meaningful']) + 1).',<9999999-dev';
             }
 
             if ($minorOnly) {
@@ -1374,7 +1406,17 @@ EOT
             }
         }
 
-        $candidate = $versionSelector->findBestCandidate($name, $targetVersion, $bestStability, $platformReqFilter);
+        if ($this->getIO()->isVerbose()) {
+            $showWarnings = true;
+        } else {
+            $showWarnings = static function (PackageInterface $candidate) use ($package): bool {
+                if (str_starts_with($candidate->getVersion(), 'dev-') || str_starts_with($package->getVersion(), 'dev-')) {
+                    return false;
+                }
+                return version_compare($candidate->getVersion(), $package->getVersion(), '<=');
+            };
+        }
+        $candidate = $versionSelector->findBestCandidate($name, $targetVersion, $bestStability, $platformReqFilter, 0, $this->getIO(), $showWarnings);
         while ($candidate instanceof AliasPackage) {
             $candidate = $candidate->getAliasOf();
         }

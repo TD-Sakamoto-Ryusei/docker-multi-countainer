@@ -487,7 +487,7 @@ class BasicEntityPersister implements EntityPersister
             $targetType    = PersisterHelper::getTypeOfField($targetMapping->identifier[0], $targetMapping, $this->em);
 
             if ($targetType === []) {
-                throw UnrecognizedField::byName($targetMapping->identifier[0]);
+                throw UnrecognizedField::byFullyQualifiedName($this->class->name, $targetMapping->identifier[0]);
             }
 
             $types[] = reset($targetType);
@@ -890,15 +890,17 @@ class BasicEntityPersister implements EntityPersister
 
         $valueVisitor->dispatch($expression);
 
-        [$params, $types] = $valueVisitor->getParamsAndTypes();
-
-        foreach ($params as $param) {
-            $sqlParams = array_merge($sqlParams, $this->getValues($param));
-        }
+        [, $types] = $valueVisitor->getParamsAndTypes();
 
         foreach ($types as $type) {
-            [$field, $value] = $type;
-            $sqlTypes        = array_merge($sqlTypes, $this->getTypes($field, $value, $this->class));
+            [$field, $value, $operator] = $type;
+
+            if ($value === null && ($operator === Comparison::EQ || $operator === Comparison::NEQ)) {
+                continue;
+            }
+
+            $sqlParams = array_merge($sqlParams, $this->getValues($value));
+            $sqlTypes  = array_merge($sqlTypes, $this->getTypes($field, $value, $this->class));
         }
 
         return [$sqlParams, $sqlTypes];
@@ -1199,7 +1201,7 @@ class BasicEntityPersister implements EntityPersister
                 continue;
             }
 
-            throw UnrecognizedField::byName($fieldName);
+            throw UnrecognizedField::byFullyQualifiedName($this->class->name, $fieldName);
         }
 
         return ' ORDER BY ' . implode(', ', $orderByList);
@@ -1506,6 +1508,9 @@ class BasicEntityPersister implements EntityPersister
         $columnAlias  = $this->getSQLColumnAlias($fieldMapping['columnName']);
 
         $this->currentPersisterContext->rsm->addFieldResult($alias, $columnAlias, $field);
+        if (! empty($fieldMapping['enumType'])) {
+            $this->currentPersisterContext->rsm->addEnumResult($columnAlias, $fieldMapping['enumType']);
+        }
 
         if (isset($fieldMapping['requireSQLConversion'])) {
             $type = Type::getType($fieldMapping['type']);
@@ -1754,7 +1759,7 @@ class BasicEntityPersister implements EntityPersister
             return [$field];
         }
 
-        throw UnrecognizedField::byName($field);
+        throw UnrecognizedField::byFullyQualifiedName($this->class->name, $field);
     }
 
     /**

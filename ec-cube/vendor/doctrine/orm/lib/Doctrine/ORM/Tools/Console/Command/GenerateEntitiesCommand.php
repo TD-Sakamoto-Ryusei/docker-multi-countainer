@@ -28,9 +28,7 @@ use function sprintf;
  */
 class GenerateEntitiesCommand extends AbstractEntityManagerCommand
 {
-    /**
-     * {@inheritdoc}
-     */
+    /** @return void */
     protected function configure()
     {
         $this->setName('orm:generate-entities')
@@ -46,7 +44,7 @@ class GenerateEntitiesCommand extends AbstractEntityManagerCommand
              ->addOption('extend', null, InputOption::VALUE_REQUIRED, 'Defines a base class to be extended by generated entity classes.')
              ->addOption('num-spaces', null, InputOption::VALUE_REQUIRED, 'Defines the number of indentation spaces', 4)
              ->addOption('no-backup', null, InputOption::VALUE_NONE, 'Flag to define if generator should avoid backuping existing entity file if it exists.')
-             ->setHelp(<<<EOT
+             ->setHelp(<<<'EOT'
 Generate entity classes and method stubs from your mapping information.
 
 If you use the <comment>--update-entities</comment> or <comment>--regenerate-entities</comment> flags your existing
@@ -76,7 +74,7 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $ui = new SymfonyStyle($input, $output);
+        $ui = (new SymfonyStyle($input, $output))->getErrorStyle();
         $ui->warning('Command ' . $this->getName() . ' is deprecated and will be removed in Doctrine ORM 3.0.');
 
         $em = $this->getEntityManager($input);

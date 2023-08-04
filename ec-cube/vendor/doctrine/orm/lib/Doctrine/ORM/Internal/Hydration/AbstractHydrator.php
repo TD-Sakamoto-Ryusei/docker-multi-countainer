@@ -468,6 +468,10 @@ abstract class AbstractHydrator
                         ? $type->convertToPHPValue($value, $this->_platform)
                         : $value;
 
+                    if ($rowData['data'][$dqlAlias][$fieldName] !== null && isset($cacheKeyInfo['enumType'])) {
+                        $rowData['data'][$dqlAlias][$fieldName] = $this->buildEnum($rowData['data'][$dqlAlias][$fieldName], $cacheKeyInfo['enumType']);
+                    }
+
                     if ($cacheKeyInfo['isIdentifier'] && $value !== null) {
                         $id[$dqlAlias]                .= '|' . $value;
                         $nonemptyComponents[$dqlAlias] = true;
@@ -547,6 +551,7 @@ abstract class AbstractHydrator
                     'fieldName'    => $fieldName,
                     'type'         => Type::getType($fieldMapping['type']),
                     'dqlAlias'     => $ownerMap,
+                    'enumType'     => $this->_rsm->enumMappings[$key] ?? null,
                 ];
 
                 // the current discriminator value must be saved in order to disambiguate fields hydration,
@@ -612,6 +617,7 @@ abstract class AbstractHydrator
                     'fieldName'    => $fieldName,
                     'type'         => $type,
                     'dqlAlias'     => $dqlAlias,
+                    'enumType'     => $this->_rsm->enumMappings[$key] ?? null,
                 ];
         }
 
@@ -692,7 +698,7 @@ abstract class AbstractHydrator
      *
      * @return BackedEnum|array<BackedEnum>
      */
-    private function buildEnum($value, string $enumType)
+    final protected function buildEnum($value, string $enumType)
     {
         if (is_array($value)) {
             return array_map(static function ($value) use ($enumType): BackedEnum {

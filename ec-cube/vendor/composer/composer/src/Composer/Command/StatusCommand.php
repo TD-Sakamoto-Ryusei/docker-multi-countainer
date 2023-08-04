@@ -99,6 +99,9 @@ EOT
         foreach ($installedRepo->getCanonicalPackages() as $package) {
             $downloader = $dm->getDownloaderForPackage($package);
             $targetDir = $im->getInstallPath($package);
+            if ($targetDir === null) {
+                continue;
+            }
 
             if ($downloader instanceof ChangeReportInterface) {
                 if (is_link($targetDir)) {
@@ -125,7 +128,7 @@ EOT
 
                     $currentVersion = $guesser->guessVersion($dumper->dump($package), $targetDir);
 
-                    if ($previousRef && $currentVersion && $currentVersion['commit'] !== $previousRef) {
+                    if ($previousRef && $currentVersion && $currentVersion['commit'] !== $previousRef && $currentVersion['pretty_version'] !== $previousRef) {
                         $vcsVersionChanges[$targetDir] = [
                             'previous' => [
                                 'version' => $package->getPrettyVersion(),

@@ -29,9 +29,7 @@ use function sprintf;
  */
 class ResultCommand extends AbstractEntityManagerCommand
 {
-    /**
-     * {@inheritdoc}
-     */
+    /** @return void */
     protected function configure()
     {
         $this->setName('orm:clear-cache:result')
@@ -65,7 +63,7 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $ui = new SymfonyStyle($input, $output);
+        $ui = (new SymfonyStyle($input, $output))->getErrorStyle();
 
         $em          = $this->getEntityManager($input);
         $cache       = $em->getConfiguration()->getResultCache();

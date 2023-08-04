@@ -98,6 +98,8 @@ class Platform
         }
 
         return Preg::replaceCallback('#^(\$|(?P<percent>%))(?P<var>\w++)(?(percent)%)(?P<path>.*)#', static function ($matches): string {
+            assert(is_string($matches['var']));
+
             // Treat HOME as an alias for USERPROFILE on Windows for legacy reasons
             if (Platform::isWindows() && $matches['var'] === 'HOME') {
                 return (Platform::getEnv('HOME') ?: Platform::getEnv('USERPROFILE')) . $matches['path'];
@@ -146,7 +148,7 @@ class Platform
             if (
                 !ini_get('open_basedir')
                 && is_readable('/proc/version')
-                && false !== stripos(Silencer::call('file_get_contents', '/proc/version'), 'microsoft')
+                && false !== stripos((string)Silencer::call('file_get_contents', '/proc/version'), 'microsoft')
                 && !file_exists('/.dockerenv') // docker running inside WSL should not be seen as WSL
             ) {
                 return self::$isWindowsSubsystemForLinux = true;

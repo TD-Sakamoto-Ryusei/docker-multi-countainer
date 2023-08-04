@@ -19,9 +19,7 @@ use function sprintf;
  */
 class CreateCommand extends AbstractCommand
 {
-    /**
-     * {@inheritdoc}
-     */
+    /** @return void */
     protected function configure()
     {
         $this->setName('orm:schema-tool:create')
@@ -57,14 +55,16 @@ EOT
             return 0;
         }
 
-        $ui->caution('This operation should not be executed in a production environment!');
+        $notificationUi = $ui->getErrorStyle();
 
-        $ui->text('Creating database schema...');
-        $ui->newLine();
+        $notificationUi->caution('This operation should not be executed in a production environment!');
+
+        $notificationUi->text('Creating database schema...');
+        $notificationUi->newLine();
 
         $schemaTool->createSchema($metadatas);
 
-        $ui->success('Database schema created successfully!');
+        $notificationUi->success('Database schema created successfully!');
 
         return 0;
     }

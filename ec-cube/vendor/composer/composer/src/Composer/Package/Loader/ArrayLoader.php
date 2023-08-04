@@ -75,7 +75,7 @@ class ArrayLoader implements LoaderInterface
     }
 
     /**
-     * @param list<array<mixed>> $versions
+     * @param array<array<mixed>> $versions
      *
      * @return list<CompletePackage|CompleteAliasPackage>
      */
@@ -271,7 +271,7 @@ class ArrayLoader implements LoaderInterface
             }
 
             if (!empty($config['keywords']) && \is_array($config['keywords'])) {
-                $package->setKeywords($config['keywords']);
+                $package->setKeywords(array_map('strval', $config['keywords']));
             }
 
             if (!empty($config['license'])) {
@@ -455,7 +455,7 @@ class ArrayLoader implements LoaderInterface
         if (
             isset($config['default-branch'])
             && $config['default-branch'] === true
-            && false === $this->versionParser->parseNumericAliasPrefix($config['version'])
+            && false === $this->versionParser->parseNumericAliasPrefix(Preg::replace('{^v}', '', $config['version']))
         ) {
             return VersionParser::DEFAULT_BRANCH_ALIAS;
         }

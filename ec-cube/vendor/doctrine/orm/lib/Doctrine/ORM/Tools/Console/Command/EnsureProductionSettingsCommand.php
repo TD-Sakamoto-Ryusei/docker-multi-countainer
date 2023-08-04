@@ -19,9 +19,7 @@ use Throwable;
  */
 class EnsureProductionSettingsCommand extends AbstractEntityManagerCommand
 {
-    /**
-     * {@inheritdoc}
-     */
+    /** @return void */
     protected function configure()
     {
         $this->setName('orm:ensure-production-settings')
@@ -38,7 +36,7 @@ class EnsureProductionSettingsCommand extends AbstractEntityManagerCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $ui = new SymfonyStyle($input, $output);
+        $ui = (new SymfonyStyle($input, $output))->getErrorStyle();
         $ui->warning('This console command has been deprecated and will be removed in a future version of Doctrine ORM.');
 
         $em = $this->getEntityManager($input);
