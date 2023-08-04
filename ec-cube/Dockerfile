@@ -81,9 +81,9 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
   | xargs -0 chmod g+s \
   ;
 
-RUN cat .env
-
-RUN bin/console cache:clear && \
+RUN cd ec-cube && \
+    RUN cat .env && \
+    bin/console cache:clear && \
     bin/console doctrine:database:create && \
     bin/console doctrine:schema:create && \
     bin/console eccube:fixtures:load && \
