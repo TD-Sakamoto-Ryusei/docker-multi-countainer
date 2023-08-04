@@ -84,7 +84,11 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
 RUN ls
 
 RUN composer install --no-scripts --no-autoloader --no-plugins -d ${APACHE_DOCUMENT_ROOT} && \
-    composer dumpautoload && \
+    composer update && \
+    composer dumpautoload
+    
+RUN bin/console doctrine:schema:create && \
+    bin/console eccube:fixtures:load && \
     bin/console eccube:composer:install
 
 HEALTHCHECK --interval=10s --timeout=5s --retries=30 CMD pgrep apache
