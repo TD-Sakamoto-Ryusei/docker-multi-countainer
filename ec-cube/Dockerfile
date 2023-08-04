@@ -62,16 +62,15 @@ COPY ec-cube/dockerbuild/php.ini $PHP_INI_DIR/conf.d/
 COPY ec-cube/dockerbuild/docker-php-entrypoint /usr/local/bin/
 
 RUN curl -sS https://getcomposer.org/installer | php && \
-    mv composer.phar /usr/bin/composer 
-    # && \
-    # php /usr/bin/composer selfupdate --2 && \
-    # php /usr/bin/composer create-project ec-cube/ec-cube ec-cube "4.2.x-dev" --keep-vcs
+    mv composer.phar /usr/bin/composer && \
+    php /usr/bin/composer selfupdate --2 && \
+    php /usr/bin/composer create-project ec-cube/ec-cube ec-cube "4.2.x-dev" --keep-vcs
 
 # Composerの設定
 RUN composer config -g repos.packagist composer https://packagist.jp
 
 #symfony
-# RUN curl -sS https://get.symfony.com/cli/installer | bash
+RUN curl -sS https://get.symfony.com/cli/installer | bash
 
 COPY . ${APACHE_DOCUMENT_ROOT}
 WORKDIR ${APACHE_DOCUMENT_ROOT}
@@ -81,6 +80,8 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
   && find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune \) -or \( -type d -print0 \) \
   | xargs -0 chmod g+s \
   ;
+
+RUN ls
 
 RUN composer update && \
     composer install --no-scripts --no-autoloader --no-plugins -d ${APACHE_DOCUMENT_ROOT}
