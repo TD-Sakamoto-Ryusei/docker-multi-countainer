@@ -63,7 +63,7 @@ COPY ec-cube/dockerbuild/docker-php-entrypoint /usr/local/bin/
 
 RUN curl -sS https://getcomposer.org/installer | php && \
     mv composer.phar /usr/bin/composer && \
-    php /usr/bin/composer selfupdate --1
+    php /usr/bin/composer selfupdate --2
 
 # Composerの設定
 RUN composer config -g repos.packagist composer https://packagist.jp
@@ -79,8 +79,7 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
 
 RUN ls
 
-RUN composer self-update && \
-    composer install --no-scripts --no-autoloader --no-plugins -d ${APACHE_DOCUMENT_ROOT} && \
+RUN composer install --no-scripts --no-autoloader --no-plugins -d ${APACHE_DOCUMENT_ROOT} && \
     composer dumpautoload && \
     bin/console eccube:composer:install
 
