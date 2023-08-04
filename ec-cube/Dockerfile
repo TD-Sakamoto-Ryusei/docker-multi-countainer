@@ -81,7 +81,8 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
   | xargs -0 chmod g+s \
   ;
 
-RUN cat .env
+RUN cd ec-cube &&\
+    cat .env
 
 RUN composer clear-cache && \
     composer update && \
