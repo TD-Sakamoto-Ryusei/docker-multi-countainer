@@ -84,8 +84,8 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
 RUN cd ec-cube &&\
     cat .env
 
-RUN composer clear-cache && \
-    composer update && \
+RUN pwd && \
+    composer clear-cache && \
     composer install --no-scripts --no-autoloader --no-plugins -d ${APACHE_DOCUMENT_ROOT}
 
 RUN bin/console cache:clear && \
