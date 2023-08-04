@@ -82,7 +82,6 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
   ;
 
 RUN ls -a
-RUN cp -ap .env.dist .env
 
 RUN bin/console cache:clear && \
     bin/console doctrine:database:create && \
