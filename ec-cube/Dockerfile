@@ -84,8 +84,7 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
 
 RUN ls
 
-RUN cd ec-cube && \ 
-    composer install --no-scripts --no-autoloader --no-plugins -d /var/www/html && \
+RUN composer install --no-scripts --no-autoloader --no-plugins -d && \
     composer dumpautoload && \
     bin/console eccube:composer:install
 
