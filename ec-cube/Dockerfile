@@ -1,6 +1,6 @@
 FROM php:7.4-apache-bullseye
 
-ENV APACHE_DOCUMENT_ROOT ./ec-cube
+ENV APACHE_DOCUMENT_ROOT ./ec-cube/ec-cube
 
 RUN apt update \
   && apt upgrade -y \
@@ -81,9 +81,7 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
   | xargs -0 chmod g+s \
   ;
 
-RUN cd ec-cube && \
-    cat .env && \
-    bin/console cache:clear && \
+RUN bin/console cache:clear && \
     bin/console doctrine:database:create && \
     bin/console doctrine:schema:create && \
     bin/console eccube:fixtures:load && \
