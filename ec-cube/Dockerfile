@@ -79,7 +79,8 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
 
 RUN ls
 
-RUN composer install --no-scripts --no-autoloader --no-plugins -d ${APACHE_DOCUMENT_ROOT} && \
+RUN composer self-update && \
+    composer install --no-scripts --no-autoloader --no-plugins -d ${APACHE_DOCUMENT_ROOT} && \
     composer dumpautoload && \
     bin/console eccube:composer:install
 
