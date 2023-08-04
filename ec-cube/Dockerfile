@@ -88,7 +88,8 @@ RUN pwd && \
     composer clear-cache && \
     composer install --no-scripts --no-autoloader --no-plugins -d ${APACHE_DOCUMENT_ROOT}
 
-RUN bin/console cache:clear && \
+RUN cd ec-cube &&\
+    bin/console cache:clear && \
     bin/console doctrine:database:create && \
     bin/console doctrine:schema:create && \
     bin/console eccube:fixtures:load && \
