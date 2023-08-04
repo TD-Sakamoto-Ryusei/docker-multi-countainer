@@ -83,7 +83,9 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
 
 RUN ls
 
-RUN bin/console doctrine:schema:create && \
+RUN bin/console cache:clear && \
+    bin/console doctrine:database:create && \
+    bin/console doctrine:schema:create && \
     bin/console eccube:fixtures:load && \
     bin/console eccube:composer:install
 
