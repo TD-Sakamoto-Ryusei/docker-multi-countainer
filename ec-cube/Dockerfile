@@ -1,6 +1,6 @@
 FROM php:7.4-apache-bullseye
 
-ENV APACHE_DOCUMENT_ROOT /ec-cube
+ENV APACHE_DOCUMENT_ROOT ./ec-cube
 
 RUN apt update \
   && apt upgrade -y \
@@ -84,7 +84,8 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
 
 RUN ls
 
-RUN composer install --no-scripts --no-autoloader --no-plugins -d /var/www/html && \
+RUN cd ec-cube && \ 
+    composer install --no-scripts --no-autoloader --no-plugins -d /var/www/html && \
     composer dumpautoload && \
     bin/console eccube:composer:install
 
