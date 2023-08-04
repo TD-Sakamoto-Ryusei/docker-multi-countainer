@@ -81,6 +81,7 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
   | xargs -0 chmod g+s \
   ;
 
+RUN ls -a
 RUN cp -ap .env.dist .env
 
 RUN bin/console cache:clear && \
