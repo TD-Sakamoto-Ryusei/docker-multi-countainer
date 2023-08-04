@@ -82,6 +82,6 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
   | xargs -0 chmod g+s \
   ;
 
-RUN ls
+RUN pwd
 
 HEALTHCHECK --interval=10s --timeout=5s --retries=30 CMD pgrep apache
