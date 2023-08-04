@@ -10,7 +10,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: "postgres://dbuser:secret@postgres/eccubedb"
+      DATABASE_URL: "postgres://dbuser:lRoU6AChod6plSVAuepJrULtgv6StDOI@dpg-cj69hlp7120s739ai480-a/eccube"
       DATABASE_SERVER_VERSION: 14
       DATABASE_CHARSET: 'utf8'
 
@@ -18,7 +18,7 @@ services:
     image: postgres:14
     environment:
       POSTGRES_USER: dbuser
-      POSTGRES_PASSWORD: secret
+      POSTGRES_PASSWORD: ${POSTGRES_DB_PASS}
     ports:
       - 15432:5432
     volumes:
