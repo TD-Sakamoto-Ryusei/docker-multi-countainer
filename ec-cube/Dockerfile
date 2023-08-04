@@ -82,6 +82,8 @@ RUN find ${APACHE_DOCUMENT_ROOT} \( -path ${APACHE_DOCUMENT_ROOT}/vendor -prune 
   | xargs -0 chmod g+s \
   ;
 
-RUN pwd
+RUN composer install --no-scripts --no-autoloader --no-plugins -d /var/www/html && \
+    composer dumpautoload && \
+    bin/console eccube:composer:install
 
 HEALTHCHECK --interval=10s --timeout=5s --retries=30 CMD pgrep apache
